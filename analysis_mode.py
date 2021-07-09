@@ -12,13 +12,6 @@ import base64
 
 from tensorflow.keras.models import load_model
 
-def load_dnn_model(path):
-    """
-    (Transfer learning) Loads the chosen model weights file, pre-trained on the WIDSM dataset.
-    """
-    model = load_model(path)
-    return model
-
 # Import saved (pre-trained) model
 path = "best_model.16-0.43.h5"
 model = load_dnn_model(path)
@@ -30,12 +23,23 @@ freq = 20
 time_period = 40
 step_length = 40
 
+def load_dnn_model(path):
+    """
+    (Transfer learning) Loads the chosen model weights file, pre-trained on the WIDSM dataset.
+    
+    path (str): filepath of weights file
+    """
+    model = load_model(path)
+    return model
+
 def create_segments_and_labels(df, time_period, step_length):
     """
     Segments the data.
-    df: dataframe
-    time_period: length of each segment
-    step_length: distance between adjacent segments
+    
+    df (pd.DataFrame): dataframe
+    time_period (int): length of each segment
+    step_length (int): distance between adjacent segments
+    
     """
     n_axis = 3
     segments = []
@@ -75,15 +79,21 @@ def predict(df, time_period, step_length):
     return conf, label
 
 def drop_index(df):
+	"""
+	Cleans a dataframe by removing the 'index' column (if it is present)
+	
+	df (pd.DataFrame): dataframe
+	
+	"""
     if 'index' in df.columns:
         df = df.drop(['index'], axis=1)
     return df
 
 def normalise(df):
     """
-    Function that normalises a dataset to take values within -1 and 1.
+    Normalises a dataset to take values within -1 and 1.
     
-    df (pd.DataFrame): Input dataset.
+    df (pd.DataFrame): dataframe
     
     """
     x = df.columns[df.columns.str.contains("x")]
@@ -141,7 +151,7 @@ def main():
             df_dyn = pd.read_csv(file_dyn, sep=',')
             df_vit = pd.read_csv(file_vit, sep=',')
             
-            # Clean data (if required)
+            # Clean data
             df_dyn = drop_index(df_dyn)
             df_vit = drop_index(df_vit)
 
@@ -169,6 +179,7 @@ def main():
                     # Create a new dictionary which stores a dataframe for each vitals parameter
                     dyn_dict.update({"{}".format(dyn_cols[i]): ""})
                     
+                    # Check if down/up-sampling is required
                     if "acc" in dyn_cols[i]:
                         if dyn_freq_dict[dyn_cols[i]]>20:
                             rs = 1
@@ -262,6 +273,7 @@ def main():
             
             max_t = max(dyn_max_t, vit_max_t)
 
+			# Set custom Streamlit layout
             c0, c1 = st.beta_columns((1, 1))
             
             with c0:
@@ -308,7 +320,7 @@ def main():
 
             with c3:
                 
-                #Dynamics
+                ### Dynamics
 
                 dyn_sel = st.multiselect('Select dynamics data:', [dyn_cols[i] for i in range(len(dyn_cols))], [dyn_cols[i] for i in range(len(dyn_cols))])
         
@@ -325,8 +337,7 @@ def main():
 
                 container_dyn.write(chart_dyn)
 
-
-                # Vitals
+                ### Vitals
 
                 vit_sel = st.multiselect('Select vitals data:', [vit_cols[i] for i in range(len(vit_cols))], [vit_cols[i] for i in range(len(vit_cols))])
         
@@ -339,8 +350,7 @@ def main():
 
                 container_vit.write(chart_vit)
                 
-                
-            # Activity classifier
+            ### Activity classifier
 
             df_dyn_acc = df_dyn_acc[:len(label)]
             df_dyn_acc['activity_label'] = label
@@ -361,7 +371,6 @@ def main():
             container_act_conf = st.empty()
             container_act_conf.write(chart_act_conf.configure_title(fontSize=18).configure_axis(labelFontSize = 15, titleFontSize = 15))
 
-            
             # Download data
             
             st.markdown('<h3>Download data:</h3>', unsafe_allow_html=True)
@@ -379,7 +388,6 @@ def main():
             if st.button('Download dynamics data as CSV'):
                 tmp_download_link = download_link(df_dyn_download, "{}_dynamics.csv".format(patient_name), 'Click here to download your file')
                 st.markdown(tmp_download_link, unsafe_allow_html=True)
-                
             
             vit_sel_1 = st.multiselect('Select vitals data to download:', [vit_cols[i] for i in range(len(vit_cols))], [vit_cols[i] for i in range(len(vit_cols))])
 
@@ -404,7 +412,6 @@ def main():
             if st.button('Download classification results as CSV'):
                 tmp_download_link = download_link(df_dyn_acc_download, "{}_activity.csv".format(patient_name), 'Click here to download your file')
                 st.markdown(tmp_download_link, unsafe_allow_html=True)
-
 
             ### PLAYBACK
             
