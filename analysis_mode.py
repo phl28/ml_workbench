@@ -131,7 +131,7 @@ def main():
     frame_height = 175
 
     # File uploader widget
-    with st.sidebar.beta_expander("Upload Files"):
+    with st.sidebar.expander("Upload Files"):
         file_dyn = st.file_uploader("Upload Dynamics Data", type=['csv'])
         file_vit = st.file_uploader("Upload Vitals Data", type=['csv'])
         file_vid = st.file_uploader("Upload Video", type=['mp4', 'avi', 'mov'])
@@ -152,7 +152,7 @@ def main():
             st.write('')
             st.write('')
 
-            with st.sidebar.beta_expander("Select sampling rate"):
+            with st.sidebar.expander("Select sampling rate"):
 
                 st.write("Dynamics (Hz)")
 
@@ -262,7 +262,7 @@ def main():
 
             max_t = max(dyn_max_t, vit_max_t)
 
-            c0, c1 = st.beta_columns((1, 1))
+            c0, c1 = st.columns((1, 1))
 
             with c0:
                 st.image('graphic_wide.png', width=600)
@@ -283,7 +283,7 @@ def main():
                 df_temp = df_temp[(df_temp['idx'] >= values[0])  & (df_temp['idx'] <= values[1])]
                 vit_dict["{}".format(vit_cols[i])] = df_temp
 
-            c2, c3 = st.beta_columns((1, 1))
+            c2, c3 = st.columns((1, 1))
 
             with c2:
 
