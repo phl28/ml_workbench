@@ -304,7 +304,8 @@ def main():
 
                 st.markdown('<center><h3>Environmental Video</h3></center>', unsafe_allow_html=True)
                 st.write('')
-                stframe = st.image(frame, width=frame_width, height=frame_height+50)
+                stframe = st.image(frame, width=frame_width)
+                # stframe = st.image(frame, width=frame_width, height=frame_height+50)
 
             with c3:
 
