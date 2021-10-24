@@ -9,6 +9,7 @@ import io
 import tempfile
 import random
 import base64
+from PIL import Image
 
 from tensorflow.keras.models import load_model
 
@@ -124,22 +125,28 @@ def download_link(object_to_download, download_filename, download_link_text):
 
 # Helper function for the main page
 def main():
-    st.set_page_config(layout="wide")
+    image = Image.open('logo.png')
+    st.set_page_config(page_title = "Dashboard", page_icon = image, layout="wide")
 
     # Set standard frame width and height
     frame_width = 600
     frame_height = 175
-
+    
     # File uploader widget
     with st.sidebar.expander("Upload Files"):
         file_dyn = st.file_uploader("Upload Dynamics Data", type=['csv'])
         file_vit = st.file_uploader("Upload Vitals Data", type=['csv'])
         file_vid = st.file_uploader("Upload Video", type=['mp4', 'avi', 'mov'])
+    
+    # just playing around with code
+    # with st.sidebar.expander("New classification"):
+    #     new_classification = st.text_input("Enter new classification")
 
     if file_dyn is not None and file_vit is not None and file_vid is not None:
             # Process input data
-            df_dyn = pd.read_csv(file_dyn, sep=',')
-            df_vit = pd.read_csv(file_vit, sep=',')
+            # removed the sep parameter as it is not needed
+            df_dyn = pd.read_csv(file_dyn)
+            df_vit = pd.read_csv(file_vit)
 
             # Clean data (if required)
             df_dyn = drop_index(df_dyn)
@@ -149,6 +156,8 @@ def main():
             dyn_cols = df_dyn.columns
             vit_cols = df_vit.columns
 
+            # This is just to make the first line of words lower (so just for formatting)
+            st.write('')
             st.write('')
             st.write('')
 
