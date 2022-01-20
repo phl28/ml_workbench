@@ -204,7 +204,7 @@ if file_dyn is not None and file_vit is not None and file_vid is not None and re
             alert_decision = ["Value", "Mean"]
             alerts = st.selectbox("Confidence level alert based on:", alert_decision)
             if alerts == "Value":
-                alert = st.number_input("Value below:", min_value = 50, max_value = 100, value = 80, step = 5)
+                alert = st.number_input("Value below (%):", min_value = 50, max_value = 100, value = 80, step = 5)
             elif alerts == "Mean":
                 alert = st.number_input("Number of standard deviations below mean:", min_value = 0.0, max_value = 2.0, value = 0.0, step = 0.5)
 
@@ -308,7 +308,7 @@ if file_dyn is not None and file_vit is not None and file_vid is not None and re
 
         for i in range(len(dyn_cols)):
             if dyn_cols[i] in dyn_sel:
-                chart_dyn += alt.Chart(dyn_dict[dyn_cols[i]]).mark_line().encode(x = alt.X('idx', axis = alt.Axis(title = 'Time (s)')), y = alt.Y(dyn_cols[i], axis = alt.Axis(title = 'Dynamics')), color = 'key').properties(width = frame_width, height = frame_height)
+                chart_dyn += alt.Chart(dyn_dict[dyn_cols[i]]).mark_line().encode(x = alt.X('idx', axis = alt.Axis(title = 'Time (s)')), y = alt.Y(dyn_cols[i], axis = alt.Axis(title = 'Dynamics')), color = 'key').properties(width = frame_width * 2.5, height = frame_height * 1.3)
 
                 # , scale=alt.Scale(domain=[int(values[0]),int(values[1])])
 
@@ -326,7 +326,7 @@ if file_dyn is not None and file_vit is not None and file_vid is not None and re
 
         for i in range(len(vit_cols)):
             if vit_cols[i] in vit_sel:
-                chart_vit += alt.Chart(vit_dict[vit_cols[i]]).mark_line().encode(x = alt.X('idx',axis = alt.Axis(title = 'Time (s)')), y = alt.Y(vit_cols[i], axis = alt.Axis(title = 'Vitals')), color = 'key').properties(width = frame_width, height = frame_height)
+                chart_vit += alt.Chart(vit_dict[vit_cols[i]]).mark_line().encode(x = alt.X('idx',axis = alt.Axis(title = 'Time (s)')), y = alt.Y(vit_cols[i], axis = alt.Axis(title = 'Vitals')), color = 'key').properties(width = frame_width * 2.5, height = frame_height * 1.3)
 
         container_vit.write(chart_vit)     
 
