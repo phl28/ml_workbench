@@ -44,7 +44,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 #User interface
-col1, col2, col3 = st.columns([3,6,1])
+col1, col2, col3 = st.columns([3,6,2])
 
 with col1: 
     st.write("")
@@ -55,8 +55,13 @@ with col2:
 with col3:
     st.write("")
 
-st.header("Description")
-st.markdown('<p class="small-font">Platform for general use, both with medical related and general engineering data sources to aid the analysis of data through the use of Neural Networks.', unsafe_allow_html= True)
+col1, col2, col3 = st.columns([2,10,1])
+with col3:
+    st.write("")
+with col1:
+    st.write("")
+with col2:
+    st.markdown('<p class="small-font">Platform for general use, both with medical related and general engineering data sources to aid the analysis of data through the use of Neural Networks.', unsafe_allow_html= True)
 
 # Download user manual 
 with st.sidebar.expander("User Manual"):
@@ -71,9 +76,6 @@ with st.sidebar.expander("Upload Files"):
     real_path = st.selectbox('Choose the model you would like to use', path)
     model = load_dnn_model(real_path)
   
-# just playing around with code
-# with st.sidebar.expander("New classification"):
-#     new_classification = st.text_input("Enter new classification")
 
 if file_dyn is not None and file_vit is not None and file_vid is not None and real_path is not None:
         # Process input data
@@ -190,61 +192,75 @@ if file_dyn is not None and file_vit is not None and file_vid is not None and re
 
         max_t = max(dyn_max_t, vit_max_t)
 
-
-        # with c1:
-        values = st.slider('Select a time range (s) for classification', 0, int(max_t), (0, int(max_t)))
-        st.write('Selected time range:', values, 's')
                 
-            
+    
 
-        for i in range(len(dyn_cols)):
-            df_temp = dyn_dict["{}".format(dyn_cols[i])]
-            df_temp = df_temp[(df_temp['idx'] >= values[0])  & (df_temp['idx'] <= values[1])]
-            dyn_dict["{}".format(dyn_cols[i])] = df_temp
-
-        for i in range(len(vit_cols)):
-            df_temp = vit_dict["{}".format(vit_cols[i])]
-            df_temp = df_temp[(df_temp['idx'] >= values[0])  & (df_temp['idx'] <= values[1])]
-            vit_dict["{}".format(vit_cols[i])] = df_temp
-
-        c2, c3 = st.columns((1, 1))
+        c2, c3 = st.columns((1,1))
 
         with c3:
-            frame_rate = st.number_input("Frame rate:", min_value = 10, max_value = 60, value = 30, step = 10)
-            # Dynamics
-            # if we want default options then we can add [dyn_cols[i] for i in range(len(dyn_cols))] at the end of the multiselect() function
-            dyn_sel = st.multiselect('Select dynamics data:', [dyn_cols[i] for i in range(len(dyn_cols))])
+            frame_rate = st.number_input("Video frame rate:", min_value = 10, max_value = 60, value = 30, step = 10)
 
-            container_dyn = st.empty()
-            chart_dyn = alt.Chart(pd.DataFrame({'x':np.arange(int(values[0]), int(values[1]),1), 'y':np.zeros(int(values[1]) - int(values[0]))})).mark_line(color = 'white').encode(x = alt.X('x', scale = alt.Scale(domain = [int(values[0]), int(values[1])])), y = alt.Y('y'))
+            # Alert Level
+            alert_decision = ["Value", "Mean"]
+            alerts = st.selectbox("Confidence level alert based on:", alert_decision)
+            if alerts == "Value":
+                alert = st.number_input("Value below:", min_value = 50, max_value = 100, value = 80, step = 5)
+            elif alerts == "Mean":
+                alert = st.number_input("Number of standard deviations below mean:", min_value = 0.0, max_value = 2.0, value = 0.0, step = 0.5)
 
-            for i in range(len(dyn_cols)):
-                if dyn_cols[i] in dyn_sel:
-                    chart_dyn += alt.Chart(dyn_dict[dyn_cols[i]]).mark_line().encode(x = alt.X('idx', axis = alt.Axis(title = 'Time (s)')), y = alt.Y(dyn_cols[i], axis = alt.Axis(title = 'Dynamics')), color = 'key').properties(width = frame_width, height = frame_height)
+            mean_conf = np.mean(confidence)
+            std_conf = np.std(confidence)
+            intervals = []
+            below = False
+            if alerts == "Value":
+                for i in range(len(confidence)):
+                    if confidence[i] < alert/100 and below == False:
+                        below = True
+                        intervals.append(i)
+                    elif confidence[i] >= alert/100 and below == True:
+                        below = False
+                        intervals.append(i)
+            elif alerts == "Mean":
+                for i in range(len(confidence)):
+                    if confidence[i] < mean_conf - alert * std_conf and below == False:
+                        below = True
+                        intervals.append(i)
+                    elif confidence[i] > mean_conf - alert * std_conf and below == True:
+                        below = False
+                        intervals.append(i)
 
-                    # , scale=alt.Scale(domain=[int(values[0]),int(values[1])])
+            interval_start = [round(intervals[i] * max_t / len(confidence), 2) for i in range(len(intervals)) if i % 2 == 0 ]
+            interval_end = [round(intervals[i] * max_t / len(confidence), 2) for i in range(len(intervals)) if i % 2 == 1 ]
 
-                    #chart_dyn += alt.Chart(dyn_dict[dyn_cols[i]]).mark_line().encode(x=alt.X('idx', axis=alt.Axis(title='Time (s)'), scale=alt.Scale(domain=[int(values[0]),int(values[1])])), y=alt.Y(dyn_cols[i], axis=alt.Axis(title='Dynamics')), color='key').properties(width=frame_width, height=frame_height)
+            new_intervals = list(zip(interval_start, interval_end))
 
-            container_dyn.write(chart_dyn)
+            interest = st.selectbox("Choose the interval you would like to investigate in:", new_intervals)
+            
+            values = st.slider('Select a time range (s) for analysis', 0, int(max_t), (0, int(max_t)))
+            st.write('Selected time range:', values, 's')
+            
+            # Activity classifier
+            df_dyn_acc = df_dyn_acc[:len(label)]
+            df_dyn_acc['activity_label'] = label
+            df_dyn_acc['confidence'] = confidence
+            df_dyn_acc['idx'] = df_dyn_acc.index / 20
+            df_dyn_acc = df_dyn_acc[(df_dyn_acc['idx'] >= values[0])  & (df_temp['idx'] <= values[1])]
+
+            st.markdown('<center><h3>Confidence Level</h3></center>', unsafe_allow_html = True)
+            # st.write("")
 
 
-            # Vitals
-            # Same as above, we can add this if we want default options: [vit_cols[i] for i in range(len(vit_cols))]
-            vit_sel = st.multiselect('Select vitals data:', [vit_cols[i] for i in range(len(vit_cols))])
+            chart_act_conf = alt.Chart(df_dyn_acc).mark_line(color = 'red').encode(x = alt.X('idx', axis = alt.Axis(title = 'Time (s)'), scale = alt.Scale(domain = [int(values[0]), int(values[1])])), y = alt.Y('confidence', axis = alt.Axis(title = 'Confidence'))).properties(width = frame_width * 1.5, height = frame_height * 1.3)
 
-            container_vit = st.empty()
-            chart_vit = alt.Chart(pd.DataFrame({'x':np.arange(int(values[0]), int(values[1]),1), 'y':np.zeros(int(values[1]) - int(values[0]))})).mark_line(color = 'white').encode(x = alt.X('x', scale = alt.Scale(domain = [int(values[0]), int(values[1])])), y = alt.Y('y'))
+            container_act_conf = st.empty()
+            container_act_conf.write(chart_act_conf.configure_title(fontSize = 18).configure_axis(labelFontSize = 15, titleFontSize = 15))
 
-            for i in range(len(vit_cols)):
-                if vit_cols[i] in vit_sel:
-                    chart_vit += alt.Chart(vit_dict[vit_cols[i]]).mark_line().encode(x = alt.X('idx',axis = alt.Axis(title = 'Time (s)')), y = alt.Y(vit_cols[i], axis = alt.Axis(title = 'Vitals')), color = 'key').properties(width = frame_width, height = frame_height)
 
-            container_vit.write(chart_vit)
+        
 
         with c2:
             st.markdown('<center><h3>Environmental Video</h3></center>', unsafe_allow_html = True)
-            st.video(file_vid, start_time = values[0])
+            # st.video(file_vid, start_time = values[0])
             # Video processing
             tfile = tempfile.NamedTemporaryFile(delete = True)
             tfile.write(file_vid.read())
@@ -262,33 +278,58 @@ if file_dyn is not None and file_vit is not None and file_vid is not None and re
 
 
             st.write('')
-            stframe = st.image(frame, width = 650)
+            stframe = st.image(frame, width = 750)
             # stframe = st.image(frame, width=frame_width, height=frame_height+50)
             start = st.button('Start Playback')
             stop = st.button("Pause")
 
-            
+        for i in range(len(dyn_cols)):
+            df_temp = dyn_dict["{}".format(dyn_cols[i])]
+            df_temp = df_temp[(df_temp['idx'] >= values[0])  & (df_temp['idx'] <= values[1])]
+            dyn_dict["{}".format(dyn_cols[i])] = df_temp
 
-        # Activity classifier
-
-        df_dyn_acc = df_dyn_acc[:len(label)]
-        df_dyn_acc['activity_label'] = label
-        df_dyn_acc['confidence'] = confidence
-        df_dyn_acc['idx'] = df_dyn_acc.index / 20
-        df_dyn_acc = df_dyn_acc[(df_dyn_acc['idx'] >= values[0])  & (df_temp['idx'] <= values[1])]
-
-        st.markdown('<center><h3>Neural network (Activity Classifier)</h3></center>', unsafe_allow_html = True)
-        st.write("")
-
-        chart_act = alt.Chart(df_dyn_acc).mark_point(color = 'green').encode(x = alt.X('idx', axis = alt.Axis(title = 'Time (s)'), scale = alt.Scale(domain = [int(values[0]), int(values[1])])), y = alt.Y('activity_label', axis = alt.Axis(title = 'Activity'))).properties(width = frame_width * 2, height = frame_height * 1.3)
+        for i in range(len(vit_cols)):
+            df_temp = vit_dict["{}".format(vit_cols[i])]
+            df_temp = df_temp[(df_temp['idx'] >= values[0])  & (df_temp['idx'] <= values[1])]
+            vit_dict["{}".format(vit_cols[i])] = df_temp
+        
+        st.markdown('<center><h3>Classifier</h3></center>', unsafe_allow_html = True)  
+        chart_act = alt.Chart(df_dyn_acc).mark_point(color = 'green').encode(x = alt.X('idx', axis = alt.Axis(title = 'Time (s)'), scale = alt.Scale(domain = [int(values[0]), int(values[1])])), y = alt.Y('activity_label', axis = alt.Axis(title = 'Activity'))).properties(width = frame_width * 2.5, height = frame_height * 1.3)
 
         container_act = st.empty()
-        container_act.write(chart_act.configure_title(fontSize = 18).configure_axis(labelFontSize = 15, titleFontSize = 15))
+        container_act.write(chart_act.configure_title(fontSize = 18).configure_axis(labelFontSize = 15, titleFontSize = 15))       
+        
+        # Dynamics
+        # if we want default options then we can add [dyn_cols[i] for i in range(len(dyn_cols))] at the end of the multiselect() function
+        dyn_sel = st.multiselect('Select dynamics data:', [dyn_cols[i] for i in range(len(dyn_cols))])
 
-        chart_act_conf = alt.Chart(df_dyn_acc).mark_line(color = 'red').encode(x = alt.X('idx', axis = alt.Axis(title = 'Time (s)'), scale = alt.Scale(domain = [int(values[0]), int(values[1])])), y = alt.Y('confidence', axis = alt.Axis(title = 'Confidence'))).properties(width = frame_width * 2, height = frame_height * 1.3)
+        container_dyn = st.empty()
+        chart_dyn = alt.Chart(pd.DataFrame({'x':np.arange(int(values[0]), int(values[1]),1), 'y':np.zeros(int(values[1]) - int(values[0]))})).mark_line(color = 'white').encode(x = alt.X('x', scale = alt.Scale(domain = [int(values[0]), int(values[1])])), y = alt.Y('y'))
 
-        container_act_conf = st.empty()
-        container_act_conf.write(chart_act_conf.configure_title(fontSize = 18).configure_axis(labelFontSize = 15, titleFontSize = 15))
+        for i in range(len(dyn_cols)):
+            if dyn_cols[i] in dyn_sel:
+                chart_dyn += alt.Chart(dyn_dict[dyn_cols[i]]).mark_line().encode(x = alt.X('idx', axis = alt.Axis(title = 'Time (s)')), y = alt.Y(dyn_cols[i], axis = alt.Axis(title = 'Dynamics')), color = 'key').properties(width = frame_width, height = frame_height)
+
+                # , scale=alt.Scale(domain=[int(values[0]),int(values[1])])
+
+                #chart_dyn += alt.Chart(dyn_dict[dyn_cols[i]]).mark_line().encode(x=alt.X('idx', axis=alt.Axis(title='Time (s)'), scale=alt.Scale(domain=[int(values[0]),int(values[1])])), y=alt.Y(dyn_cols[i], axis=alt.Axis(title='Dynamics')), color='key').properties(width=frame_width, height=frame_height)
+
+        container_dyn.write(chart_dyn)
+
+
+        # Vitals
+        # Same as above, we can add this if we want default options: [vit_cols[i] for i in range(len(vit_cols))]
+        vit_sel = st.multiselect('Select vitals data:', [vit_cols[i] for i in range(len(vit_cols))])
+
+        container_vit = st.empty()
+        chart_vit = alt.Chart(pd.DataFrame({'x':np.arange(int(values[0]), int(values[1]),1), 'y':np.zeros(int(values[1]) - int(values[0]))})).mark_line(color = 'white').encode(x = alt.X('x', scale = alt.Scale(domain = [int(values[0]), int(values[1])])), y = alt.Y('y'))
+
+        for i in range(len(vit_cols)):
+            if vit_cols[i] in vit_sel:
+                chart_vit += alt.Chart(vit_dict[vit_cols[i]]).mark_line().encode(x = alt.X('idx',axis = alt.Axis(title = 'Time (s)')), y = alt.Y(vit_cols[i], axis = alt.Axis(title = 'Vitals')), color = 'key').properties(width = frame_width, height = frame_height)
+
+        container_vit.write(chart_vit)     
+
 
 
         # Download data
@@ -359,7 +400,7 @@ if file_dyn is not None and file_vit is not None and file_vid is not None and re
             cap.set(cv2.CAP_PROP_POS_FRAMES, frame_current)
             ret, frame = cap.read()
                 
-            stframe.image(frame, width = 650)
+            stframe.image(frame, width = 750)
             # stframe.image(frame, width=frame_width, height=frame_height)
 
             frame_current += 1
