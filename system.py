@@ -88,7 +88,8 @@ if file_dyn is not None and file_vit is not None and file_vid is not None and re
         # Create arrays of column headers from both input dynamics and vitals data
         dyn_cols = df_dyn.columns
         vit_cols = df_vit.columns
-        
+
+        st.write(df_dyn.iloc[4:8])
 
         with st.sidebar.expander("Select sampling rate"):
             st.write("Dynamics (Hz)")
@@ -248,7 +249,6 @@ if file_dyn is not None and file_vit is not None and file_vid is not None and re
 
             st.markdown('<center><h3>Confidence Level</h3></center>', unsafe_allow_html = True)
             # st.write("")
-
 
             chart_act_conf = alt.Chart(df_dyn_acc).mark_line(color = 'red').encode(x = alt.X('idx', axis = alt.Axis(title = 'Time (s)'), scale = alt.Scale(domain = [int(values[0]), int(values[1])])), y = alt.Y('confidence', axis = alt.Axis(title = 'Confidence'))).properties(width = frame_width * 1.5, height = frame_height * 1.3)
 

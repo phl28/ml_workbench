@@ -12,6 +12,7 @@ import base64
 from PIL import Image
 from tqdm import tqdm
 from tensorflow.keras.models import load_model
+import pickle
 
 def load_dnn_model(path):
     """
@@ -112,3 +113,7 @@ def download_link(object_to_download, download_filename, download_link_text):
 
     return f'<a href="data:file/txt;base64,{b64}" download="{download_filename}">{download_link_text}</a>'
 
+def save_model(model_name, model):
+    # using pickle to save the trained model
+
+    return pickle.dump(model, open('{}'.format(model_name), 'wb'))
