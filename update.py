@@ -16,8 +16,10 @@ def app():
 
     uploaded_data = st.file_uploader("Upload data:** ", type = ["csv"], accept_multiple_files = True)
     st.markdown('<p class="small-font">**All files should have the same columns', unsafe_allow_html= True)
+    uploaded_video = st.file_uploader("Upload video", type = ['mp4', 'avi', 'mov'], accept_multiple_files=False)
 
-    sampling_rate = st.number_input(label = "Sampling rate", min_value = 0.0, max_value = None, value = 20.0, step = 1.0)
+
+    sampling_rate = st.number_input(label = "Sampling rate (Hz)", min_value = 0.0, max_value = None, value = 20.0, step = 0.1)
 
     if len(uploaded_data) != 0:
         column_labels = []
@@ -157,6 +159,11 @@ def app():
         conf_container = st.empty()
         conf_container.write(chart_conf)
 
+        # show video (either use st.video or cv2) 
+        # need to see which one allows the video range to be changed continuously
+
+        
+        
         # we would then need to ask if anything corrections need to be made 
         # ie if the user need to add new classification labels
         new_label = st.text_input("What label would you like to add to this region?", value = "", placeholder = "Empty")

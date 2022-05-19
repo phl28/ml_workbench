@@ -25,7 +25,7 @@ def app():
 
     uploaded_data = st.file_uploader("Upload data for training and testing: ", type = ["csv"], accept_multiple_files = True)
 
-    sampling_rate = st.number_input(label = "Sampling rate", min_value = 0.0, max_value = None, value = 20.0, step = 1.0)
+    sampling_rate = st.number_input(label = "Sampling rate (Hz)", min_value = 0.0, max_value = None, value = 20.0, step = 0.1)
 
     if len(uploaded_data) != 0:
         column_labels = []
