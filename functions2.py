@@ -17,12 +17,12 @@ from tensorflow.keras.models import load_model
 from sklearn.model_selection import train_test_split
 import os.path
 
-def load_dnn_model(path):
-    """
-    (Transfer learning) Loads the chosen model weights file, pre-trained on the WIDSM dataset.
-    """
-    model = load_model(path)
-    return model
+# def load_dnn_model(path):
+#     """
+#     (Transfer learning) Loads the chosen model weights file, pre-trained on the WIDSM dataset.
+#     """
+#     model = load_model(path)
+#     return model
 
 # def create_segments_and_labels(df, time_period, step_length):
 #     """
@@ -137,3 +137,6 @@ def generate_data(new_data_streams, length_of_data, *args, **kwargs):
     
     return data
 
+def load_file(file_path):
+
+    pass

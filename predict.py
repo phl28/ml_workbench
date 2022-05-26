@@ -23,10 +23,11 @@ def app():
     #     model = load_dnn_model(real_path)
 
     # this flag is used to determine if a real path has been chosen and the subsequent code can be run
+    
     flag = False
     if real_path is not None:
         # real_path = real_path_2
-        model = load_dnn_model(real_path)
+        model = load_model(real_path.name)
         flag = True
     else:
         st.sidebar.write("Alert: You have not chosen a model.")  
@@ -46,6 +47,7 @@ def app():
             features = st.multiselect("Which columns do you want for prediction: ", column_labels)
             labels = st.selectbox("What do you want to predict? ", column_labels)   
             st.markdown('<p class="small-font">**All the features and labels chosen here should be the same as when you trained the model', unsafe_allow_html= True)
+            sampling_rate = st.number_input(label = "Sampling rate (Hz)", min_value = 0.0, max_value = None, value = 20.0, step = 0.1)
             
             # creating a temp df just to calculate the accurate time based on sampling rate
             max_t = 0
@@ -56,30 +58,40 @@ def app():
                 max_t = df_temp['idx'].values[-1] if df_temp['idx'].values[-1] > max_t else max_t
 
 
-            # normalise data
-            normalised_data = normalise(data[features])
-            label_data = data[labels]
-            num_labels = len(pd.unique(label_data))
+            if features is not None:
+                # normalise data
+                normalised_data = normalise(data[features])
 
-            col1, col2, col3 = st.columns([3, 6, 2])
 
-            with col2:
                 st.write("Normalised features data preview")
                 with st.empty():
                     st.write(normalised_data.head(10))
                 # plot the normalised features data
-                alt.Chart()
-                st.write("Label data preview")
-                with st.empty():
-                    st.write(label_data.head(10)) 
+                st.line_chart(normalised_data[:int(0.1*len(normalised_data))])
+
+                    
+                # make predictions with the uploaded data
+                predictions = model.predict(normalised_data)
+
+                # plot confidence and predictions
                 
+                conf = []
+                pred = np.argmax(predictions, axis = -1)
+                for i in predictions:
+                    conf.append(max(i))
+                pred = pd.DataFrame(pred, columns = ["predictions"])
+                conf = pd.DataFrame(conf, columns = ["confidence"])
 
-            # make predictions with the uploaded data
-            predictions = model.predict()
+                # # we could also give the option to plot the data
+                chart_data = alt.Chart(pred.reset_index()).mark_line().encode(x='index', y='predictions').properties(width = 1300, height = 300)
+                container_data = st.empty()
+                container_data.write(chart_data)
 
-            # plot confidence and predictions
+                # # we would need to also include a confidence level chart here just to show the results not to do anything else
+                chart_conf = alt.Chart(conf.reset_index()).mark_line().encode(x='index', y='confidence').properties(width = 1300, height = 300)
+                conf_container = st.empty()
+                conf_container.write(chart_conf)
 
 
-            # show video
-
-            
+                # show video
+                
