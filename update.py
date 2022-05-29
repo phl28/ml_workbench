@@ -31,6 +31,10 @@ def app():
             # column_labels += list(df.columns)
         data = pd.concat(li, axis = 0, ignore_index = True)
         data = drop_index(data)
+
+        # creating a copy of data here so that we can update later 
+        new_data = data
+        
         column_labels = list(data.columns)
         # column_labels.remove("index")
         features = st.multiselect("Which columns do you want for prediction: ", column_labels)
@@ -135,7 +139,7 @@ def app():
                 if alerts == "Value":
                     alert = st.number_input("Value below (%):", min_value = 50, max_value = 100, value = 80, step = 5)
                 elif alerts == "Mean":
-                    alert = st.number_input("Number of standard deviations below mean:", min_value = 0.0, max_value = 2.0, value = 0.0, step = 0.5)
+                    alert2 = st.number_input("Number of standard deviations below mean:", min_value = 0.0, max_value = 2.0, value = 0.0, step = 0.5)
                 
                 mean_conf = np.mean(conf)
                 std_conf = np.std(conf)
@@ -151,10 +155,10 @@ def app():
                             intervals.append(i)
                 elif alerts == "Mean":
                     for i in range(len(conf)):
-                        if conf[i] < mean_conf - alert * std_conf and below == False:
+                        if conf[i] < mean_conf - alert2 * std_conf and below == False:
                             below = True
                             intervals.append(i)
-                        elif conf[i] >= mean_conf - alert * std_conf and below == True:
+                        elif conf[i] >= mean_conf - alert2 * std_conf and below == True:
                             below = False
                             intervals.append(i)
 
@@ -198,17 +202,20 @@ def app():
                 # ie if the user need to add new classification labels
                 new_label = st.text_input("What label would you like to add to this region?", value = "")
 
-
                 if new_label != "":
-                    data.loc[start_interval:end_interval+1, labels] = new_label
+                    new_data.loc[start_interval:end_interval+1, labels] = new_label
                     st.write("New label data at the targetted region")
                     with st.empty():
-                        st.write(data[labels].iloc[start_interval - 2:end_interval+3])
-                
+                        st.write(new_data[labels].iloc[start_interval - 2:end_interval+3])
+            
             # save new data into a new csv file
-
+            filename = st.text_input("Name of the new data")
+            if filename != "":
+                new_data.to_csv('{}.csv'.format(filename))
+                st.write("New data is saved.")
 
             model_name = st.text_input("Model Name")
             if model_name != "":
+                model_name += ".h5"
                 save_model(model_name, model)
                 st.markdown('<p class="small-font">Model is saved.', unsafe_allow_html= True)
