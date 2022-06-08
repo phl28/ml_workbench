@@ -34,16 +34,14 @@ def main():
     # Set standard frame width and height
     frame_width = 600
     frame_height = 175
-    
+    video_frame_width = 650
+
     # File uploader widget
     with st.sidebar.expander("Upload Files"):
         file_dyn = st.file_uploader("Upload Dynamics Data", type = ['csv'])
         file_vit = st.file_uploader("Upload Vitals Data", type = ['csv'])
         file_vid = st.file_uploader("Upload Video", type = ['mp4', 'avi', 'mov'])
     
-    # just playing around with code
-    # with st.sidebar.expander("New classification"):
-    #     new_classification = st.text_input("Enter new classification")
 
     if file_dyn is not None and file_vit is not None and file_vid is not None:
             # Process input data
@@ -228,7 +226,7 @@ def main():
 
             with c2:
                 st.markdown('<center><h3>Environmental Video</h3></center>', unsafe_allow_html = True)
-                st.video(file_vid, start_time = values[0])
+                # st.video(file_vid, start_time = values[0])
                 # Video processing
                 tfile = tempfile.NamedTemporaryFile(delete = True)
                 tfile.write(file_vid.read())
@@ -246,7 +244,7 @@ def main():
 
 
                 st.write('')
-                stframe = st.image(frame, width = 650)
+                stframe = st.image(frame, width = video_frame_width)
                 # stframe = st.image(frame, width=frame_width, height=frame_height+50)
                 start = st.button('Start Playback')
                 stop = st.button("Pause")
@@ -344,7 +342,7 @@ def main():
                 cap.set(cv2.CAP_PROP_POS_FRAMES, frame_current)
                 ret, frame = cap.read()
                 
-                stframe.image(frame, width = 650)
+                stframe.image(frame, width = video_frame_width)
                 # stframe.image(frame, width=frame_width, height=frame_height)
 
                 frame_current += 1

@@ -18,11 +18,17 @@ def app():
     uploaded_data = st.file_uploader("Upload data:** ", type = ["csv"], accept_multiple_files = True)
     # st.markdown('<p class="small-font">**All files should have the same columns', unsafe_allow_html= True)
     uploaded_video = st.file_uploader("Upload video", type = ['mp4', 'avi', 'mov'], accept_multiple_files=False)
+    real_path = st.file_uploader("Choose the model you would like to use", type = ['h5'])
 
+    flag = False
+    if real_path is not None:
+        # real_path = real_path_2
+        model = load_model(real_path.name)
+        flag = True
 
     sampling_rate = st.number_input(label = "Sampling rate (Hz)", min_value = 0.0, max_value = None, value = 20.0, step = 0.1)
 
-    if len(uploaded_data) != 0:
+    if len(uploaded_data) != 0 and flag:
         column_labels = []
         li = []
         for files in uploaded_data:
@@ -100,20 +106,20 @@ def app():
             n_timesteps, n_features, n_outputs = train_data_shape[0], train_data_shape[1], train_data_label_shape[1]
             # making predictions
             # model building
-            model = Sequential([
-                keras.layers.LSTM(100, input_shape = (n_timesteps, n_features)),
-                keras.layers.Dropout(0.5),
-                keras.layers.Dense(100, activation = 'relu'),
-                keras.layers.Dense(n_outputs, activation = 'softmax')
-            ])
+            # model = Sequential([
+            #     keras.layers.LSTM(100, input_shape = (n_timesteps, n_features)),
+            #     keras.layers.Dropout(0.5),
+            #     keras.layers.Dense(100, activation = 'relu'),
+            #     keras.layers.Dense(n_outputs, activation = 'softmax')
+            # ])
             
-            model.compile(optimizer = 'adam', loss='categorical_crossentropy', metrics = ['accuracy']) # adam is just the algorithm that performs gradient descent
-            model.fit(train_data, train_label, epochs = 15, validation_data = (val_data, val_label))
-            val_loss, accuracy = model.evaluate(test_data, test_label, verbose = 0)
+            # model.compile(optimizer = 'adam', loss='categorical_crossentropy', metrics = ['accuracy']) # adam is just the algorithm that performs gradient descent
+            # model.fit(train_data, train_label, epochs = 15, validation_data = (val_data, val_label))
+            # val_loss, accuracy = model.evaluate(test_data, test_label, verbose = 0)
 
 
             predictions = model.predict(test_data)
-            st.write("Test accuracy: {}%".format(round(accuracy*100, 3)))
+            # st.write("Test accuracy: {}%".format(round(accuracy*100, 3)))
 
             conf = []
             pred = np.argmax(predictions, axis = -1)
@@ -183,19 +189,29 @@ def app():
                 
                 # # plotting data in the targetted region
                 with col1:
+                    st.write("Predictions")
                     chart_data = alt.Chart(predict.iloc[start_interval:(end_interval+1)].reset_index()).mark_line().encode(x='index', y='predictions').properties(width = 600, height = 300)
                     container_data = st.empty()
                     container_data.write(chart_data)
 
                 # # confidence chart of the targetted region
                 with col2:
+                    st.write("Confidence")
                     chart_conf = alt.Chart(confidence.iloc[start_interval:(end_interval+1)].reset_index()).mark_line().encode(x='index', y='confidence').properties(width = 600, height = 300)
                     conf_container = st.empty()
                     conf_container.write(chart_conf)
+                
+                col3, col4 = st.columns([1,1])
+                with col3:
+                    st.write("Raw Data")
+                    chart_raw = alt.Chart(test_data.iloc[start_interval:(end_interval+1)].reset_index()).mark_line().encode(x='index', y='weight').properties(width = 600, height = 300)
+                    container_raw = st.empty()
+                    container_raw.write(chart_raw)
 
                 # show video (either use st.video or cv2) 
                 # need to see which one allows the video range to be changed continuously 
-
+                with col4:
+                    st.video(uploaded_video)
                 
                 
                 # we would then need to ask if anything corrections need to be made 

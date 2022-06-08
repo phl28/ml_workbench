@@ -44,11 +44,12 @@ def app():
             data = drop_index(data)
             column_labels = list(set(column_labels))
             column_labels.remove("index")
+
             features = st.multiselect("Which columns do you want for prediction: ", column_labels)
             labels = st.selectbox("What do you want to predict? ", column_labels)   
             st.markdown('<p class="small-font">**All the features and labels chosen here should be the same as when you trained the model', unsafe_allow_html= True)
             sampling_rate = st.number_input(label = "Sampling rate (Hz)", min_value = 0.0, max_value = None, value = 20.0, step = 0.1)
-            
+
             # creating a temp df just to calculate the accurate time based on sampling rate
             max_t = 0
             for i in range(len(data.columns)):
@@ -81,17 +82,42 @@ def app():
                     conf.append(max(i))
                 pred = pd.DataFrame(pred, columns = ["predictions"])
                 conf = pd.DataFrame(conf, columns = ["confidence"])
+                chart_width = 1300
+                chart_height = 300
+                
+                c1, c2 = st.columns((1,1))
+                with c1:
+                    # show video
+                    st.video(uploaded_videos)
+                
+                with c2:
+                    # incomplete raw data plot 
+                    variables = st.multiselect('Select features data:', [column_labels[i] for i in range(len(column_labels))], [column_labels[i] for i in range(len(column_labels))])
 
-                # # we could also give the option to plot the data
-                chart_data = alt.Chart(pred.reset_index()).mark_line().encode(x='index', y='predictions').properties(width = 1300, height = 300)
-                container_data = st.empty()
-                container_data.write(chart_data)
+                    container_data = st.empty()
+                    chart_data = alt.Chart(pd.DataFrame({'x':np.arange(0, int(max_t),1), 'y':np.zeros(int(max_t) - 0)})).mark_line(color = 'white').encode(x = alt.X('x', scale = alt.Scale(domain = [0, int(max_t)])), y = alt.Y('y'))
 
-                # # we would need to also include a confidence level chart here just to show the results not to do anything else
-                chart_conf = alt.Chart(conf.reset_index()).mark_line().encode(x='index', y='confidence').properties(width = 1300, height = 300)
+                    # incomplete 
+                    # for i in range(len(column_labels)):
+                    #     if column_labels[i] in variables:
+                    #         chart_data += alt.Chart(data_dict[column_labels[i]]).mark_line().encode(x = alt.X('idx', axis = alt.Axis(title = 'Time (s)')), y = alt.Y(column_labels[i], axis = alt.Axis(title = 'Features')), color = 'key').properties(width = chart_width, height = chart_height)
+                    
+                    container_data.write(chart_data)
+                
+                # predictions plot
+                st.write("Predictions")
+                chart_pred = alt.Chart(pred.reset_index()).mark_line().encode(x='index', y='predictions').properties(width = chart_width, height = chart_height)
+                container_pred = st.empty()
+                container_pred.write(chart_pred)
+
+                # confidence level chart here 
+                st.write("Confidence")
+                chart_conf = alt.Chart(conf.reset_index()).mark_line().encode(x='index', y='confidence').properties(width = chart_width, height = chart_height)
                 conf_container = st.empty()
                 conf_container.write(chart_conf)
 
+               
 
-                # show video
-                
+
+ 
+
