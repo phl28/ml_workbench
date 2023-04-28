@@ -2,7 +2,7 @@
 
 Author: Adrian Lui
 
-To run the system, navigate to the file with 
+To run the system, navigate to the folder with 
 1)functions2.py
 2)system2.py
 3)update.py
