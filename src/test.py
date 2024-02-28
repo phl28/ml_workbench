@@ -13,9 +13,11 @@ st.write("Write")
 with open("User Manual.pdf", "rb") as file:
     st.download_button("Download here", file, "User Manual.pdf")
 
-file = st.file_uploader("Upload files to be analyzed", type = ['csv'])
+file = st.file_uploader("Upload files to be analyzed", type=["csv"])
 # file = 'sample_data/sample_dyn.csv'
-uploaded_videos = st.file_uploader("Upload video", type = ['mp4', 'avi', 'mov'], accept_multiple_files = True)
+uploaded_videos = st.file_uploader(
+    "Upload video", type=["mp4", "avi", "mov"], accept_multiple_files=True
+)
 
 # if file is not None:
 #     with open(file, 'rb') as rawdata:
@@ -34,7 +36,7 @@ data = pd.read_csv(file)
 # column_labels = list(set(column_labels))
 # column_labels.remove("index")
 # features = st.multiselect("Which columns do you want for prediction: ", column_labels)
-# labels = st.selectbox("What do you want to predict? ", column_labels)  
+# labels = st.selectbox("What do you want to predict? ", column_labels)
 
 
 with st.empty():
@@ -48,9 +50,7 @@ with st.empty():
 #     st.write(features)
 
 
-
-
-#---------------------------------------------------------------------------------
+# ---------------------------------------------------------------------------------
 # placeholder = st.empty()
 
 # # Replace the placeholder with some text:
@@ -96,8 +96,8 @@ with st.empty():
 #             task1 = new_task
 #             flag = True
 #         count += 1
-    
-#------------------------------------------------------------------------------------------------
+
+# ------------------------------------------------------------------------------------------------
 
 # def main():
 #     uploaded_data = st.file_uploader("Upload data for training and testing:** ", type = ["csv"], accept_multiple_files = True)
@@ -113,7 +113,7 @@ with st.empty():
 #         data = pd.concat(li, axis = 0, ignore_index = True)
 #         column_labels = list(set(column_labels))
 #         features = st.multiselect("Which columns do you want for prediction: ", column_labels)
-#         labels = st.selectbox("What do you want to predict? ", column_labels)   
+#         labels = st.selectbox("What do you want to predict? ", column_labels)
 #         # tbh we might not be able to do it this way because this is a continous time series data
 
 #         # normalise data
@@ -127,35 +127,34 @@ with st.empty():
 # -------------------------------------------------------------------------------------------
 
 
-
 # task1 = st.sidebar.button("Train model")
 # if task1:
 #     # code where we allow users to train model start here
 #     uploaded_data = st.sidebar.file_uploader("Upload data for training and testing:** ", type = ["csv"], accept_multiple_files = False)
 #     st.markdown('<p class="small-font">**All files should have the same columns', unsafe_allow_html= True)
 
-    # if len(uploaded_data) > 0:
-    #     column_labels = []
-    #     li = []
-    #     for files in uploaded_data:
-    #         files = drop_index(files)
-    #         df = pd.read_csv(files, index_col = None, header = 0)
-    #         li.append(df)
-    #         column_labels += df.columns
-    #     data = pd.concat(li, axis = 0, ignore_index = True)
-    #     column_labels = list(set(column_labels))
-    #     features = st.multiselect("Which columns do you want for prediction: ", column_labels)
-    #     labels = st.selectbox("What do you want to predict? ", column_labels)   
-    #     # tbh we might not be able to do it this way because this is a continous time series data
+# if len(uploaded_data) > 0:
+#     column_labels = []
+#     li = []
+#     for files in uploaded_data:
+#         files = drop_index(files)
+#         df = pd.read_csv(files, index_col = None, header = 0)
+#         li.append(df)
+#         column_labels += df.columns
+#     data = pd.concat(li, axis = 0, ignore_index = True)
+#     column_labels = list(set(column_labels))
+#     features = st.multiselect("Which columns do you want for prediction: ", column_labels)
+#     labels = st.selectbox("What do you want to predict? ", column_labels)
+#     # tbh we might not be able to do it this way because this is a continous time series data
 
-    #     # normalise data
-    #     normalised_data = normalise(data[features])
-    #     # st.dataframe(normalised_data)
+#     # normalise data
+#     normalised_data = normalise(data[features])
+#     # st.dataframe(normalised_data)
 
 # data = keras.datasets.fashion_mnist ## load dataset
 # (train_data, train_labels), (test_data, test_labels) = data.load_data() ## split into testing and training
 # model = keras.Sequential([
-#     keras.layers.Flatten(input_shape = (28,28)), 
+#     keras.layers.Flatten(input_shape = (28,28)),
 #     keras.layers.Dense(128, activation = 'relu'),
 #     keras.layers.Dense(10, activation = 'softmax')
 # ])
@@ -182,9 +181,9 @@ with st.empty():
 # time_period = 40
 # step_length = 40
 
-# image = Image.open('logo.png')
+# image = Image.open('./img/logo.png')
 # st.set_page_config(page_title = "Dashboard", page_icon = image, layout = "wide")
- 
+
 # # Set standard frame width and height
 # frame_width = 600
 # frame_height = 175
@@ -204,11 +203,11 @@ with st.empty():
 # #User interface
 # col1, col2, col3 = st.columns([3,6,2])
 
-# with col1: 
+# with col1:
 #     st.write("")
 
 # with col2:
-#     st.image('new_logo.png', width = 800)
+#     st.image('./img/new_logo.png', width = 800)
 
 # with col3:
 #     st.write("")
@@ -221,11 +220,11 @@ with st.empty():
 # with col2:
 #     st.markdown('<p class="small-font">Platform for general use, both with medical related and general engineering data sources to aid the analysis of data through the use of Neural Networks.', unsafe_allow_html= True)
 
-# # Download user manual 
+# # Download user manual
 # st.sidebar.header("User Manual")
 # with open("User Manual.pdf", "rb") as file:
 #     st.sidebar.download_button("Download here", file, "User Manual.pdf")
-        
+
 # # File uploader widget
 # st.sidebar.header("Initialisation")
 # with st.sidebar.expander("Upload Files"):
@@ -244,10 +243,8 @@ with st.empty():
 #     real_path = real_path_2
 #     model = load_dnn_model(real_path)
 # else:
-#     st.write("Alert: You have not chosen a model.")  
+#     st.write("Alert: You have not chosen a model.")
 
-
-  
 
 # if file_dyn is not None and file_vit is not None and file_vid is not None and real_path is not None:
 #         # Process input data
@@ -260,7 +257,7 @@ with st.empty():
 #         # Create arrays of column headers from both input dynamics and vitals data
 #         dyn_cols = df_dyn.columns
 #         vit_cols = df_vit.columns
-        
+
 
 #         with st.sidebar.expander("Select sampling rate"):
 #             st.write("Dynamics (Hz)")
@@ -364,8 +361,6 @@ with st.empty():
 
 #         max_t = max(dyn_max_t, vit_max_t)
 
-                
-    
 
 #         c2, c3 = st.columns((1,1))
 
@@ -407,10 +402,10 @@ with st.empty():
 #             new_intervals = list(zip(interval_start, interval_end))
 #             new_intervals.append("All")
 #             interest = st.selectbox("Choose the interval you would like to investigate in:", new_intervals)
-            
+
 #             values = st.slider('Select a time range (s) for analysis', 0, int(max_t), (0, int(max_t)))
 #             st.write('Selected time range:', values, 's')
-            
+
 #             # Activity classifier
 #             df_dyn_acc = df_dyn_acc[:len(label)]
 #             df_dyn_acc['activity_label'] = label
@@ -431,8 +426,6 @@ with st.empty():
 #             container_act_conf = st.empty()
 #             container_act_conf.write(chart_act_conf.configure_title(fontSize = 18).configure_axis(labelFontSize = 15, titleFontSize = 15))
 
-
-        
 
 #         with c2:
 #             st.markdown('<center><h3>Environmental Video</h3></center>', unsafe_allow_html = True)
@@ -468,13 +461,13 @@ with st.empty():
 #             df_temp = vit_dict["{}".format(vit_cols[i])]
 #             df_temp = df_temp[(df_temp['idx'] >= values[0])  & (df_temp['idx'] <= values[1])]
 #             vit_dict["{}".format(vit_cols[i])] = df_temp
-        
-#         st.markdown('<center><h3>Classifier</h3></center>', unsafe_allow_html = True)  
+
+#         st.markdown('<center><h3>Classifier</h3></center>', unsafe_allow_html = True)
 #         chart_act = alt.Chart(df_dyn_acc).mark_point(color = 'green').encode(x = alt.X('idx', axis = alt.Axis(title = 'Time (s)'), scale = alt.Scale(domain = [int(values[0]), int(values[1])])), y = alt.Y('activity_label', axis = alt.Axis(title = 'Activity'))).properties(width = frame_width * 2.5, height = frame_height * 1.3)
 
 #         container_act = st.empty()
-#         container_act.write(chart_act.configure_title(fontSize = 18).configure_axis(labelFontSize = 15, titleFontSize = 15))       
-        
+#         container_act.write(chart_act.configure_title(fontSize = 18).configure_axis(labelFontSize = 15, titleFontSize = 15))
+
 #         # Dynamics
 #         # if we want default options then we can add [dyn_cols[i] for i in range(len(dyn_cols))] at the end of the multiselect() function
 #         dyn_sel = st.multiselect('Select dynamics data:', [dyn_cols[i] for i in range(len(dyn_cols))])
@@ -504,8 +497,7 @@ with st.empty():
 #             if vit_cols[i] in vit_sel:
 #                 chart_vit += alt.Chart(vit_dict[vit_cols[i]]).mark_line().encode(x = alt.X('idx',axis = alt.Axis(title = 'Time (s)')), y = alt.Y(vit_cols[i], axis = alt.Axis(title = 'Vitals')), color = 'key').properties(width = frame_width * 2.5, height = frame_height * 1.3)
 
-#         container_vit.write(chart_vit)     
-
+#         container_vit.write(chart_vit)
 
 
 #         # Download data
@@ -575,7 +567,7 @@ with st.empty():
 
 #             cap.set(cv2.CAP_PROP_POS_FRAMES, frame_current)
 #             ret, frame = cap.read()
-                
+
 #             stframe.image(frame, width = 750)
 #             # stframe.image(frame, width=frame_width, height=frame_height)
 
